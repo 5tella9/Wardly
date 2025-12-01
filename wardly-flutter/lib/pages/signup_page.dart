@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../auth_service.dart';
+import 'home_page.dart';
 
 class SignupPage extends StatefulWidget {
   final VoidCallback? onSigned;
@@ -29,12 +30,12 @@ class _SignupPageState extends State<SignupPage> {
 
     if (err != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
-      return;
+      MaterialPageRoute(builder: (_) => const HomePage());
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Signup berhasil')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Signup successful! Please log in.')),
+    );
     widget.onSigned?.call();
   }
 

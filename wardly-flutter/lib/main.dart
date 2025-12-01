@@ -36,7 +36,9 @@ class _HomePageState extends State<HomePage> {
     await AuthService.logout();
     if (!mounted) return;
     // back to login (replace)
-    Navigator.of(context).pushReplacementNamed('/');
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
   }
 
   void _deleteAccount() async {
@@ -306,3 +308,4 @@ class _WardlyHomeState extends State<WardlyHome> {
     setState(() => _index = 0);
   }
 }
+

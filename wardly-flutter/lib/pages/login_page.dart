@@ -24,12 +24,10 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
     if (err != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
-      return;
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
     }
-    // navigate to Home
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
   }
 
   @override
