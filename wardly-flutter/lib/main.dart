@@ -102,7 +102,7 @@ class _WardlyHomeState extends State<WardlyHome> {
             'All',
             'Pants',
             'Skirts',
-            'Dresses',
+            'Dress',
             'Shirts',
             'Outer',
             'T-Shirt',
@@ -457,3 +457,5 @@ class _WardlyHomeState extends State<WardlyHome> {
     });
   }
 }
+
+
