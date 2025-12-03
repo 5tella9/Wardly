@@ -290,6 +290,8 @@ class _WardlyHomeState extends State<WardlyHome> {
         email: email,
         password: password,
       );
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -322,6 +324,7 @@ class _WardlyHomeState extends State<WardlyHome> {
         password: password,
       );
       setState(() {}); // refresh UI with logged-in user
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Signed in as ${res.user?.email ?? email}'),
@@ -338,6 +341,7 @@ class _WardlyHomeState extends State<WardlyHome> {
     try {
       await _client.auth.signOut();
       setState(() {});
+            if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Signed out')),
       );
@@ -373,9 +377,10 @@ class _WardlyHomeState extends State<WardlyHome> {
 
       return imageUrl;
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar( 
         SnackBar(content: Text('Upload error: $e')),
       );
+      
       return null;
     }
   }
