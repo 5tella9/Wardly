@@ -22,6 +22,8 @@ class _AddProductPageState extends State<AddProductPage> {
     'Jacket',
     'Shirt',
     'Pants',
+    'Skirt',
+    'Dress',
   ];
   final List<String> _sizes = ['S', 'M', 'L', 'XL', 'XXL'];
 
@@ -59,7 +61,6 @@ class _AddProductPageState extends State<AddProductPage> {
       return;
     }
 
-    // Simpan sementara di list
     final newProduct = {
       'name': name,
       'brand': brand,
