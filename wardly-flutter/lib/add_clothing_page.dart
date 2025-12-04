@@ -30,6 +30,8 @@ class _AddClothingPageState extends State<AddClothingPage> {
     'Shorts',
     'Dress',
     'Skirt',
+    'Shoes',
+    'Accessories',
   ];
 
   final List<String> _sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];

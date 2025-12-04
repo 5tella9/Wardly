@@ -128,6 +128,8 @@ class _WardlyHomeState extends State<WardlyHome> {
                         'Outer',
                         'T-Shirt',
                         'Hoodie',
+                        'Shoes',
+                        'Accessories',
                       ]
                       .map(
                         (e) => Padding(
