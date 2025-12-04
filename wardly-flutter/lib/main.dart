@@ -7,7 +7,7 @@ import 'add_clothing_page.dart';
 import 'pages/opening_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/trending_ideas_page.dart';
-import 'pages/clothing_detail_page.dart'; // ← TAMBAHAN: Import detail page
+import 'pages/clothing_detail_page.dart';
 import 'dart:io';
 
 Future<void> main() async {
@@ -28,7 +28,7 @@ class WardlyApp extends StatelessWidget {
       title: 'WARDLY',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const IntroScreen(), // Start dengan opening page
+      home: const IntroScreen(),
       routes: {'/home': (context) => const WardlyHome()},
     );
   }
@@ -47,6 +47,9 @@ class _WardlyHomeState extends State<WardlyHome> {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  // ========== TAMBAHAN: Variable untuk filter kategori ==========
+  String _selectedCategory = 'All';
 
   SupabaseClient get _client => Supabase.instance.client;
 
@@ -79,8 +82,8 @@ class _WardlyHomeState extends State<WardlyHome> {
             children: [
               buildHome(),
               buildAdd(),
-              const TrendingIdeasPage(), // Trending tab
-              ProfilePage(wardrobeItems: items), // ← UBAH: Kirim data items
+              const TrendingIdeasPage(),
+              ProfilePage(wardrobeItems: items),
             ],
           ),
         ),
@@ -88,7 +91,7 @@ class _WardlyHomeState extends State<WardlyHome> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
-        type: BottomNavigationBarType.fixed, // Biar bisa lebih dari 3 tabs
+        type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
         unselectedItemColor: Colors.grey,
         items: const [
@@ -107,47 +110,84 @@ class _WardlyHomeState extends State<WardlyHome> {
     );
   }
 
+  // ========== TAMBAHAN: Function untuk filter items ==========
+  List<Map<String, dynamic>> get filteredItems {
+    if (_selectedCategory == 'All') {
+      return items;
+    }
+    return items.where((item) {
+      final itemCategory = item['type'] ?? item['category'] ?? '';
+      return itemCategory.toLowerCase() == _selectedCategory.toLowerCase();
+    }).toList();
+  }
+
   // ---------- HOME TAB ----------
   Widget buildHome() {
     return Column(
       children: [
         const SizedBox(height: 8),
-        // Ganti Wrap jadi SingleChildScrollView biar bisa slide horizontal
+        // ========== UBAH: Tambahkan onTap untuk setiap chip ==========
         SizedBox(
           height: 50,
           child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal, // ← INI YANG BIKIN HORIZONTAL
+            scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children:
                   [
-                        'All',
-                        'Pants',
-                        'Skirts',
-                        'Dress',
-                        'Shirts',
-                        'Outer',
-                        'T-Shirt',
-                        'Hoodie',
-                        'Shoes',
-                        'Accessories',
-                      ]
-                      .map(
-                        (e) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: Chip(label: Text(e)),
+                    'All',
+                    'Pants',
+                    'Skirts',
+                    'Dress',
+                    'Shirt',
+                    'Jacket',
+                    'T-Shirt',
+                    'Hoodie',
+                    'Shoes',
+                    'Accessories',
+                  ].map((category) {
+                    final isSelected = _selectedCategory == category;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(
+                          category,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black87,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
                         ),
-                      )
-                      .toList(),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedCategory = category;
+                          });
+                        },
+                        backgroundColor: Colors.grey[200],
+                        selectedColor: Colors.teal,
+                        checkmarkColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                      ),
+                    );
+                  }).toList(),
             ),
           ),
         ),
+        const SizedBox(height: 8),
+        // ========== UBAH: Gunakan filteredItems instead of items ==========
         Expanded(
-          child: items.isEmpty
-              ? const Center(
+          child: filteredItems.isEmpty
+              ? Center(
                   child: Text(
-                    'No items yet. Add some clothes!',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    _selectedCategory == 'All'
+                        ? 'No items yet. Add some clothes!'
+                        : 'No items in $_selectedCategory category',
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 )
               : GridView.builder(
@@ -156,17 +196,17 @@ class _WardlyHomeState extends State<WardlyHome> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: 0.8, // ← TAMBAHAN: Biar card lebih tinggi
+                    childAspectRatio: 0.8,
                   ),
-                  itemCount: items.length,
+                  itemCount: filteredItems.length,
                   itemBuilder: (_, i) {
-                    final it = items[i];
+                    final it = filteredItems[i];
                     final hasBytes = it.containsKey('bytes');
+                    // ========== UBAH: Cari index asli di items list ==========
+                    final originalIndex = items.indexOf(it);
 
-                    // ========== UBAH: Wrap dengan GestureDetector ==========
                     return GestureDetector(
                       onTap: () async {
-                        // Buka detail page
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -174,19 +214,18 @@ class _WardlyHomeState extends State<WardlyHome> {
                               item: it,
                               onDelete: () {
                                 setState(() {
-                                  items.removeAt(i);
+                                  items.removeAt(originalIndex);
                                 });
                               },
-                             
                             ),
                           ),
                         );
 
-                        // Handle action dari detail page
                         if (result != null && result is Map<String, dynamic>) {
                           if (result['action'] == 'toggleFavorite') {
                             setState(() {
-                              items[i]['fav'] = !(items[i]['fav'] ?? false);
+                              items[originalIndex]['fav'] =
+                                  !(items[originalIndex]['fav'] ?? false);
                             });
                           }
                         }
@@ -222,7 +261,6 @@ class _WardlyHomeState extends State<WardlyHome> {
                                         ),
                                       ),
                               ),
-
                               // Favorite button overlay
                               Positioned(
                                 top: 8,
@@ -252,15 +290,15 @@ class _WardlyHomeState extends State<WardlyHome> {
                                     ),
                                     onPressed: () {
                                       setState(() {
-                                        items[i]['fav'] =
-                                            !(items[i]['fav'] ?? false);
+                                        items[originalIndex]['fav'] =
+                                            !(items[originalIndex]['fav'] ??
+                                                false);
                                       });
                                     },
                                     padding: const EdgeInsets.all(8),
                                   ),
                                 ),
                               ),
-
                               // Info label di bawah
                               Positioned(
                                 bottom: 0,
@@ -352,9 +390,6 @@ class _WardlyHomeState extends State<WardlyHome> {
     );
   }
 
-  // ---------- PROFILE TAB + AUTH ----------
-  // DIHAPUS - Sekarang pake ProfilePage terpisah dari profile_page.dart
-
   // ---------- STORAGE + DB HELPERS ----------
   Future<String?> uploadImageToSupabase(Uint8List bytes) async {
     final user = _client.auth.currentUser;
@@ -417,7 +452,6 @@ class _WardlyHomeState extends State<WardlyHome> {
     );
     if (photo == null) return;
 
-    // Navigate ke AddClothingPage
     if (!mounted) return;
     final result = await Navigator.push<Map<String, dynamic>>(
       context,
@@ -426,11 +460,8 @@ class _WardlyHomeState extends State<WardlyHome> {
       ),
     );
 
-    // Kalau ada result (user save), tambahkan ke list
     if (result != null) {
       final bytes = await photo.readAsBytes();
-
-      // Upload ke Supabase kalau user login
       if (_client.auth.currentUser != null) {
         final imageUrl = await uploadImageToSupabase(bytes);
         if (imageUrl != null) {
@@ -443,7 +474,6 @@ class _WardlyHomeState extends State<WardlyHome> {
           );
         }
       }
-
       setState(() {
         items.insert(0, {
           'bytes': bytes,
@@ -453,7 +483,7 @@ class _WardlyHomeState extends State<WardlyHome> {
           'brand': result['brand'],
           'size': result['size'],
         });
-        _index = 0; // Balik ke Home tab
+        _index = 0;
       });
     }
   }
@@ -465,7 +495,6 @@ class _WardlyHomeState extends State<WardlyHome> {
     );
     if (photo == null) return;
 
-    // Navigate ke AddClothingPage
     if (!mounted) return;
     final result = await Navigator.push<Map<String, dynamic>>(
       context,
@@ -474,11 +503,8 @@ class _WardlyHomeState extends State<WardlyHome> {
       ),
     );
 
-    // Kalau ada result (user save), tambahkan ke list
     if (result != null) {
       final bytes = await photo.readAsBytes();
-
-      // Upload ke Supabase kalau user login
       if (_client.auth.currentUser != null) {
         final imageUrl = await uploadImageToSupabase(bytes);
         if (imageUrl != null) {
@@ -491,7 +517,6 @@ class _WardlyHomeState extends State<WardlyHome> {
           );
         }
       }
-
       setState(() {
         items.insert(0, {
           'bytes': bytes,
@@ -501,7 +526,7 @@ class _WardlyHomeState extends State<WardlyHome> {
           'brand': result['brand'],
           'size': result['size'],
         });
-        _index = 0; // Balik ke Home tab
+        _index = 0;
       });
     }
   }
