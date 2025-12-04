@@ -51,7 +51,7 @@ class _AddClothingPageState extends State<AddClothingPage> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Pilih dari Galeri'),
+                title: const Text('Choose from gallery'),
                 onTap: () async {
                   Navigator.pop(context);
                   final XFile? image = await _picker.pickImage(
@@ -66,7 +66,7 @@ class _AddClothingPageState extends State<AddClothingPage> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Ambil Foto'),
+                title: const Text('Take photo'),
                 onTap: () async {
                   Navigator.pop(context);
                   final XFile? image = await _picker.pickImage(
@@ -89,37 +89,40 @@ class _AddClothingPageState extends State<AddClothingPage> {
   void _saveClothing() {
     if (_image == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih gambar terlebih dahulu')),
+        const SnackBar(content: Text('Please select an image first')),
       );
       return;
     }
 
     if (_nameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nama baju tidak boleh kosong')),
+        const SnackBar(content: Text('Clothing name cannot be empty')),
       );
       return;
     }
 
     if (_brandController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Brand tidak boleh kosong')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Brand cannot be empty')),
+      );
       return;
     }
 
-    // Return data ke main page
-    Navigator.pop(context, {
+    final clothingData = {
       'name': _nameController.text,
       'category': _selectedCategory,
       'brand': _brandController.text,
       'size': _selectedSize,
       'imagePath': _image!.path,
-    });
+    };
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Success!')));
+    // show success before popping
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Saved')),
+    );
+
+    // send data back to previous page
+    Navigator.pop(context, clothingData);
   }
 
   void _cancel() {
@@ -167,7 +170,7 @@ class _AddClothingPageState extends State<AddClothingPage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Tap to change image',
+                              'Tap to add image',
                               style: TextStyle(color: Colors.grey[600]),
                             ),
                           ],
@@ -188,7 +191,7 @@ class _AddClothingPageState extends State<AddClothingPage> {
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                hintText: 'e.g Y2K Oversize Shirt',
+                hintText: 'e.g. Y2K Oversize Shirt',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -236,7 +239,7 @@ class _AddClothingPageState extends State<AddClothingPage> {
             TextField(
               controller: _brandController,
               decoration: InputDecoration(
-                hintText: 'e.g Uniqlo, H&M, Zara',
+                hintText: 'e.g. Uniqlo, H&M, Zara',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

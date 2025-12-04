@@ -12,6 +12,7 @@ dependencies:
   supabase_flutter: ^2.0.0
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.3
+  camera: ^0.10.5+9
   image_picker: ^1.0.7 # ← UPDATE INI (versi terbaru)
   path_provider: ^2.0.11
   firebase_core: ^4.2.1

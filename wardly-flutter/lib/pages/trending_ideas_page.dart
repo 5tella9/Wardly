@@ -1,14 +1,19 @@
-// ignore_for_file: unnecessary_underscores
+
 
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Data dummy untuk trending ideas
+
+import '../supabase_config.dart';
+
 class TrendingIdea {
   final String id;
   final String imageUrl;
   final String title;
   final String category;
   final String description;
+  final int likeCount;
+  final int saveCount;
 
   TrendingIdea({
     required this.id,
@@ -16,79 +21,23 @@ class TrendingIdea {
     required this.title,
     required this.category,
     required this.description,
+    required this.likeCount,
+    required this.saveCount,
   });
+
+  factory TrendingIdea.fromMap(Map<String, dynamic> map) {
+    return TrendingIdea(
+      id: map['id'].toString(),
+      imageUrl: (map['image_url'] ?? '') as String,
+      title: (map['title'] ?? '') as String,
+      category: (map['category'] ?? '') as String,
+      description: (map['description'] ?? '') as String,
+      likeCount: (map['like_count'] ?? 0) as int,
+      saveCount: (map['save_count'] ?? 0) as int,
+    );
+  }
 }
 
-// Dummy data
-final List<TrendingIdea> trendingIdeasData = [
-  TrendingIdea(
-    id: '1',
-    imageUrl:
-        'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800',
-    title: 'Summer Vibes Outfit',
-    category: 'Casual',
-    description: 'Perfect summer look with light fabrics and vibrant colors',
-  ),
-  TrendingIdea(
-    id: '2',
-    imageUrl:
-        'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800',
-    title: 'Street Style Essential',
-    category: 'Street',
-    description: 'Urban street style with oversized jacket and sneakers',
-  ),
-  TrendingIdea(
-    id: '3',
-    imageUrl:
-        'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800',
-    title: 'Minimalist Aesthetic',
-    category: 'Minimal',
-    description: 'Clean and simple wardrobe essentials',
-  ),
-  TrendingIdea(
-    id: '4',
-    imageUrl:
-        'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800',
-    title: 'Y2K Fashion Revival',
-    category: 'Y2K',
-    description: 'Nostalgic 2000s fashion making a comeback',
-  ),
-  TrendingIdea(
-    id: '5',
-    imageUrl:
-        'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?w=800',
-    title: 'Formal Business Look',
-    category: 'Formal',
-    description: 'Professional attire for important meetings',
-  ),
-  TrendingIdea(
-    id: '6',
-    imageUrl:
-        'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800',
-    title: 'Bohemian Chic',
-    category: 'Boho',
-    description: 'Free-spirited bohemian style with flowing fabrics',
-  ),
-  TrendingIdea(
-    id: '7',
-    imageUrl: 'https://images.unsplash.com/photo-1558769132-cb1aea1c8f25?w=800',
-    title: 'Athleisure Comfort',
-    category: 'Sport',
-    description: 'Comfortable activewear for everyday style',
-  ),
-  TrendingIdea(
-    id: '8',
-    imageUrl:
-        'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800',
-    title: 'Vintage Inspired',
-    category: 'Vintage',
-    description: 'Timeless vintage pieces with modern twist',
-  ),
-];
-
-// ============================================
-// TRENDING IDEAS PAGE (Pinterest Style)
-// ============================================
 class TrendingIdeasPage extends StatefulWidget {
   const TrendingIdeasPage({super.key});
 
@@ -98,9 +47,79 @@ class TrendingIdeasPage extends StatefulWidget {
 
 class _TrendingIdeasPageState extends State<TrendingIdeasPage> {
   final List<String> savedIds = [];
+  List<TrendingIdea> _trendingIdeas = [];
+  bool _loading = true;
+  String? _error;
+
+  SupabaseClient get _client => Supabase.instance.client;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTrendingIdeas();
+  }
+
+  Future<void> _loadTrendingIdeas() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      final data = await _client
+          .from('trending_items')
+          .select()
+          .eq('is_active', true)
+          .order('like_count', ascending: false)
+          .order('created_at', ascending: false);
+
+      final list = (data as List<dynamic>)
+          .map((row) => TrendingIdea.fromMap(row as Map<String, dynamic>))
+          .toList();
+
+      setState(() {
+        _trendingIdeas = list;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to load trending items: $e';
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Trending Outfits'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_error!),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: _loadTrendingIdeas,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );                
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -116,49 +135,53 @@ class _TrendingIdeasPageState extends State<TrendingIdeasPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => SavedIdeasPage(savedIds: savedIds),
+                  builder: (_) =>
+                      SavedIdeasPage(savedIds: savedIds, allIdeas: _trendingIdeas),
                 ),
               );
             },
           ),
         ],
       ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(8),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-          childAspectRatio: 0.75,
-        ),
-        itemCount: trendingIdeasData.length,
-        itemBuilder: (context, index) {
-          final idea = trendingIdeasData[index];
-          final isSaved = savedIds.contains(idea.id);
+      body: _trendingIdeas.isEmpty
+          ? const Center(child: Text('No trending items yet'))
+          : GridView.builder(
+              padding: const EdgeInsets.all(8),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 0.75,
+              ),
+              itemCount: _trendingIdeas.length,
+              itemBuilder: (context, index) {
+                final idea = _trendingIdeas[index];
+                final isSaved = savedIds.contains(idea.id);
 
-          return GestureDetector(
-            onTap: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => IdeaDetailPage(idea: idea, isSaved: isSaved),
-                ),
-              );
+                return GestureDetector(
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            IdeaDetailPage(idea: idea, isSaved: isSaved),
+                      ),
+                    );
 
-              if (result != null && result is bool) {
-                setState(() {
-                  if (result && !savedIds.contains(idea.id)) {
-                    savedIds.add(idea.id);
-                  } else if (!result) {
-                    savedIds.remove(idea.id);
-                  }
-                });
-              }
-            },
-            child: _buildIdeaCard(idea, isSaved),
-          );
-        },
-      ),
+                    if (result != null && result is bool) {
+                      setState(() {
+                        if (result && !savedIds.contains(idea.id)) {
+                          savedIds.add(idea.id);
+                        } else if (!result) {
+                          savedIds.remove(idea.id);
+                        }
+                      });
+                    }
+                  },
+                  child: _buildIdeaCard(idea, isSaved),
+                );
+              },
+            ),
     );
   }
 
@@ -273,9 +296,6 @@ class _TrendingIdeasPageState extends State<TrendingIdeasPage> {
   }
 }
 
-// ============================================
-// DETAIL PAGE (Close Up View)
-// ============================================
 class IdeaDetailPage extends StatefulWidget {
   final TrendingIdea idea;
   final bool isSaved;
@@ -436,19 +456,20 @@ class _IdeaDetailPageState extends State<IdeaDetailPage> {
   }
 }
 
-// ============================================
-// SAVED IDEAS PAGE
-// ============================================
 class SavedIdeasPage extends StatelessWidget {
   final List<String> savedIds;
+  final List<TrendingIdea> allIdeas;
 
-  const SavedIdeasPage({super.key, required this.savedIds});
+  const SavedIdeasPage({
+    super.key,
+    required this.savedIds,
+    required this.allIdeas,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final savedIdeas = trendingIdeasData
-        .where((idea) => savedIds.contains(idea.id))
-        .toList();
+    final savedIdeas =
+        allIdeas.where((idea) => savedIds.contains(idea.id)).toList();
 
     return Scaffold(
       appBar: AppBar(
