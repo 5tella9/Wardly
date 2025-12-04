@@ -123,7 +123,7 @@ class _AuthPageState extends State<AuthPage>
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF00221C),
+                      color: Colors.lightBlueAccent,
                     ),
                   ),
                   const SizedBox(height: 8),

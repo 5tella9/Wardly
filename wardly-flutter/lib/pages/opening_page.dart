@@ -12,8 +12,10 @@ class IntroScreen extends StatefulWidget {
 class _IntroScreenState extends State<IntroScreen>
     with SingleTickerProviderStateMixin {
   static const Color kBg = Colors.white;
-  static const Color kInk = Color(0xFF00221C);
-  static const Color kSoftMint = Color(0xFF6A8F88);
+  // ignore: unused_field
+  static const Color ligthblue = Color.fromARGB(255, 106, 227, 246);
+  // ignore: unused_field
+  static const Color black = Color.fromRGBO(0, 0, 0, 1);
 
   late final AnimationController _ac;
   late final Animation<double> _titleFade;
@@ -100,7 +102,7 @@ class _IntroScreenState extends State<IntroScreen>
                     'WARDLY',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.adventPro(
-                      color: kInk,
+                      color: Colors.lightBlueAccent,
                       fontSize: 64,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.5,
@@ -118,7 +120,7 @@ class _IntroScreenState extends State<IntroScreen>
                     'Your Personal Wardrobe Manager',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.aBeeZee(
-                      color: kSoftMint,
+                      color: Colors.black87,
                       fontSize: 22,
                       fontWeight: FontWeight.w400,
                       letterSpacing: 1,
@@ -137,7 +139,7 @@ class _IntroScreenState extends State<IntroScreen>
                     height: 56,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kInk,
+                        backgroundColor: Colors.lightBlueAccent,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(28),
