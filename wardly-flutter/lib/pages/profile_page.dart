@@ -12,6 +12,17 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   @override
+  void initState() {
+    super.initState();
+    // Listen to auth state changes
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      if (mounted) {
+        setState(() {}); // Refresh UI ketika auth state berubah
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
     final isLoggedIn = user != null;
@@ -86,18 +97,6 @@ class _ProfilePageState extends State<ProfilePage> {
           // Menu Items
           _buildMenuItem(
             context,
-            icon: Icons.person,
-            title: 'Account',
-            subtitle: 'Manage your account settings',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AccountPage()),
-              );
-            },
-          ),
-          _buildMenuItem(
-            context,
             icon: Icons.favorite,
             title: 'Favorites',
             subtitle: 'View your favorite items',
@@ -105,41 +104,6 @@ class _ProfilePageState extends State<ProfilePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const FavoritesPage()),
-              );
-            },
-          ),
-          _buildMenuItem(
-            context,
-            icon: Icons.dashboard,
-            title: 'Dashboard',
-            subtitle: 'View your wardrobe stats',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const DashboardPage()),
-              );
-            },
-          ),
-          const Divider(height: 32),
-          _buildMenuItem(
-            context,
-            icon: Icons.settings,
-            title: 'Settings',
-            subtitle: 'App preferences',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings coming soon!')),
-              );
-            },
-          ),
-          _buildMenuItem(
-            context,
-            icon: Icons.help_outline,
-            title: 'Help & Support',
-            subtitle: 'Get help with the app',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Help coming soon!')),
               );
             },
           ),

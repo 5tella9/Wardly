@@ -111,18 +111,33 @@ class _WardlyHomeState extends State<WardlyHome> {
     return Column(
       children: [
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          children: [
-            'All',
-            'Pants',
-            'Skirts',
-            'Dress',
-            'Shirts',
-            'Outer',
-            'T-Shirt',
-            'Hoodie',
-          ].map((e) => Chip(label: Text(e))).toList(),
+        // Ganti Wrap jadi SingleChildScrollView biar bisa slide horizontal
+        SizedBox(
+          height: 50,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal, // ← INI YANG BIKIN HORIZONTAL
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children:
+                  [
+                        'All',
+                        'Pants',
+                        'Skirts',
+                        'Dress',
+                        'Shirts',
+                        'Outer',
+                        'T-Shirt',
+                        'Hoodie',
+                      ]
+                      .map(
+                        (e) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Chip(label: Text(e)),
+                        ),
+                      )
+                      .toList(),
+            ),
+          ),
         ),
         Expanded(
           child: items.isEmpty

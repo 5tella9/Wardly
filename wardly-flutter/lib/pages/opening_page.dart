@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'auth_page.dart'; // Import AuthPage
 
 class IntroScreen extends StatefulWidget {
   const IntroScreen({super.key});
@@ -74,8 +75,10 @@ class _IntroScreenState extends State<IntroScreen>
   }
 
   void _goToHome() {
-    // Navigate ke WardlyHome (main app)
-    Navigator.of(context).pushReplacementNamed('/home');
+    // Navigate ke Login Page dulu
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const AuthPage()));
   }
 
   @override
