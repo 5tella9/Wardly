@@ -65,7 +65,11 @@ class _WardlyHomeState extends State<WardlyHome> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('WARDLY'),
-        backgroundColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          color: Colors.lightBlueAccent,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          ),
         elevation: 0,
       ),
       body: Container(
